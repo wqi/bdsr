@@ -1,2 +1,2 @@
-# zsad
-Zero-Shot Audio Denoising
+# bdsr
+Bit Depth Super-Resolution
