@@ -15,7 +15,8 @@ class WavenetDataset(torch.utils.data.Dataset):
                  item_length,
                  target_length,
                  file_location=None,
-                 classes=256,
+                 in_classes=256,
+                 target_classes=256,
                  sampling_rate=16000,
                  mono=True,
                  normalize=False,
@@ -32,8 +33,8 @@ class WavenetDataset(torch.utils.data.Dataset):
         self._item_length = item_length
         self._test_stride = test_stride
         self.target_length = target_length
-        self.classes = classes
-
+        self.in_classes = in_classes
+        self.target_classes = target_classes
         if not os.path.isfile(dataset_file):
             assert file_location is not None, "no location for dataset files specified"
             self.mono = mono
@@ -66,12 +67,15 @@ class WavenetDataset(torch.utils.data.Dataset):
         processed_files = []
         for i, file in enumerate(files):
             print("  processed " + str(i) + " of " + str(len(files)) + " files")
-            file_data, _ = lr.load(path=file,
+            file_data, _ = lr.load(path=file[0],
                                    sr=self.sampling_rate,
                                    mono=self.mono)
             if self.normalize:
                 file_data = lr.util.normalize(file_data)
-            quantized_data = quantize_data(file_data, self.classes).astype(self.dtype)
+            if file[1]:
+                quantized_data = quantize_data(file_data, self.in_classes).astype(self.dtype)
+            else:
+                quantized_data = quantize_data(file_data, self.target_classes).astype(self.dtype)
             processed_files.append(quantized_data)
 
         np.savez(self.dataset_file, *processed_files)
@@ -117,7 +121,7 @@ class WavenetDataset(torch.utils.data.Dataset):
             sample = np.concatenate((sample1, sample2))
 
         example = torch.from_numpy(sample).type(torch.LongTensor)
-        one_hot = torch.FloatTensor(self.classes, self._item_length).zero_()
+        one_hot = torch.FloatTensor(self.in_classes, self._item_length).zero_()
         one_hot.scatter_(0, example[:self._item_length].unsqueeze(0), 1.)
         target = example[-self.target_length:].unsqueeze(0)
         return one_hot, target
@@ -141,7 +145,10 @@ def list_all_audio_files(location):
     audio_files = []
     for dirpath, dirnames, filenames in os.walk(location):
         for filename in [f for f in filenames if f.endswith((".mp3", ".wav", ".aif", "aiff"))]:
-            audio_files.append(os.path.join(dirpath, filename))
+            if filename[0]=='T':
+                audio_files.append((os.path.join(dirpath, filename),False))
+            else:
+                audio_files.append((os.path.join(dirpath, filename), True))
 
     if len(audio_files) == 0:
         print("found no audio files in " + location)
