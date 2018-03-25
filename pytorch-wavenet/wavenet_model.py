@@ -32,6 +32,7 @@ class WaveNetModel(nn.Module):
                  residual_channels=32,
                  skip_channels=256,
                  end_channels=256,
+                 in_channels=256,
                  classes=256,
                  output_length=32,
                  kernel_size=2,
@@ -46,6 +47,7 @@ class WaveNetModel(nn.Module):
         self.residual_channels = residual_channels
         self.skip_channels = skip_channels
         self.classes = classes
+        self.in_channels = in_channels
         self.kernel_size = kernel_size
         self.dtype = dtype
 
@@ -62,7 +64,7 @@ class WaveNetModel(nn.Module):
         self.skip_convs = nn.ModuleList()
 
         # 1x1 convolution to create channels
-        self.start_conv = nn.Conv1d(in_channels=self.classes,
+        self.start_conv = nn.Conv1d(in_channels=self.in_channels,
                                     out_channels=residual_channels,
                                     kernel_size=1,
                                     bias=bias)
