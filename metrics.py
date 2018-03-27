@@ -1,11 +1,13 @@
 import numpy as np
-import scipy.io.wavfile as wavfile
+import scipy.io.wavfile as wav
 
 
-# Computes PSNR between two WAV files
-def snr(ref_file, in_file):
-    ref_wav = wavfile.read(ref_file)[1]
-    in_wav = wavfile.read(in_file)[1]
+def wav_snr(ref_file, in_file):
+    """
+    Compute SNR between two WAV files
+    """
+    ref_wav = wav.read(ref_file)[1]
+    in_wav = wav.read(in_file)[1]
 
     # Pad in_wav with 0s if ref_wav is slightly longer
     if (abs(in_wav.shape[0] - ref_wav.shape[0]) < 10):
@@ -26,4 +28,18 @@ def snr(ref_file, in_file):
     return snr
 
 
-print(snr('./data/test/p225_001.wav', './data/test/p225_001.wav'))
+def bd_psnr(lr, hr):
+    """
+    Compute PNSR between 8-bit PCM LR and 16-bit PCM HR inputs
+    """
+    lr_scaled = (lr * 256)
+    hr_scaled = (hr + 32768)
+
+    mse = np.sum(np.square(hr_scaled - lr_scaled)) / lr.shape[0]
+    psnr = 20 * np.log10(65535) - 10 * np.log10(mse)
+    return psnr
+
+
+hr = np.load('data/music/music_test_hr.npy')[2]
+lr = np.load('data/music/music_test_lr.npy')[2]
+print(bd_psnr(lr, hr))
