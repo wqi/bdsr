@@ -1,8 +1,10 @@
 import time
-from wavenet_model import *
+import torch
+
+from wavenet_model import WaveNetModel, load_latest_model_from
 from audio_data import WavenetDataset
-from wavenet_training import *
-from model_logging import *
+from wavenet_training import WavenetTrainer, generate_audio
+from model_logging import TensorboardLogger
 from scipy.io import wavfile
 
 dtype = torch.FloatTensor
@@ -24,8 +26,8 @@ model = WaveNetModel(layers=10,
                      dtype=dtype,
                      bias=True)
 
-#model = load_latest_model_from('snapshots', use_cuda=True)
-#model = torch.load('snapshots/some_model')
+# model = load_latest_model_from('snapshots', use_cuda=True)
+# model = torch.load('snapshots/some_model')
 
 if use_cuda:
     print("move model to gpu")
@@ -44,7 +46,7 @@ print('the dataset has ' + str(len(data)) + ' items')
 
 
 def generate_and_log_samples(step):
-    sample_length=32000
+    sample_length = 32000
     gen_model = load_latest_model_from('snapshots', use_cuda=False)
     print("start generating...")
     samples = generate_audio(gen_model,
