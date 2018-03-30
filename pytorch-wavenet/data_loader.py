@@ -25,9 +25,8 @@ class BDSRDataset(torch.utils.data.Dataset):
         offset = np.random.randint(0, hr_sample.shape[0] - self.item_length)
         lr_fragment = lr_sample[offset:offset + self.item_length].astype(int)
         hr_fragment = hr_sample[offset:offset + self.item_length].astype(int)
-
-        lr_tensor = torch.from_numpy(lr_fragment)
-        hr_tensor = torch.from_numpy(hr_fragment)
+        lr_tensor = torch.from_numpy(lr_fragment).unsqueeze(0)
+        hr_tensor = torch.from_numpy(hr_fragment).unsqueeze(0)
 
         return lr_tensor, hr_tensor
 
