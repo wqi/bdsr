@@ -23,22 +23,25 @@ class BDSRDataset(torch.utils.data.Dataset):
 
         # Sample LR and HR fragments from audio
         offset = np.random.randint(0, hr_sample.shape[0] - self.item_length)
-        lr_fragment = lr_sample[offset:offset + self.item_length].tolist()
-        hr_fragment = hr_sample[offset:offset + self.item_length].tolist()
+        lr_fragment = lr_sample[offset:offset + self.item_length].astype(int)
+        hr_fragment = hr_sample[offset:offset + self.item_length].astype(int)
 
-        return lr_fragment, hr_fragment
+        lr_tensor = torch.from_numpy(lr_fragment)
+        hr_tensor = torch.from_numpy(hr_fragment)
+
+        return lr_tensor, hr_tensor
 
 
 # Test
-dataset = BDSRDataset('../data/music/music_valid_lr.npy',
-                      '../data/music/music_valid_hr.npy',
-                      100)
-dataloader = torch.utils.data.DataLoader(dataset,
-                                         batch_size=16,
-                                         shuffle=True,
-                                         num_workers=8,
-                                         pin_memory=False)
-for (lr, hr) in iter(dataloader):
-    print(lr[0])
-    print(hr[0])
-    break
+# dataset = BDSRDataset('../data/music/music_valid_lr.npy',
+#                       '../data/music/music_valid_hr.npy',
+#                       100)
+# dataloader = torch.utils.data.DataLoader(dataset,
+#                                          batch_size=16,
+#                                          shuffle=True,
+#                                          num_workers=8,
+#                                          pin_memory=False)
+# for (lr, hr) in iter(dataloader):
+#     print(lr)
+#     print(hr)
+#     break

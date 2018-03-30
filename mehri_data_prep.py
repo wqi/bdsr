@@ -1,7 +1,6 @@
 import numpy as np
-import sox
-
 import scipy.io.wavfile as wav
+import sox
 
 
 # Downsamples WAV file to a given bit depth
@@ -20,14 +19,13 @@ def downsample_mehri_audio_set(data_path, out_path, bit_depth):
 
     # Downsample each audio sample in the NPZ
     for idx, sample in enumerate(samples):
-        wav.write('temp.wav', 12800, sample.astype('float64'))
-        downsample_wav('temp.wav', 8)
-        lr_audio = wav.read('test_lr.wav')
+        wav.write('temp.wav', 16000, sample.astype('float64'))
+        downsample_wav('temp.wav', bit_depth)
+        lr_audio = wav.read('temp_lr.wav')
         lr_samples[idx] = lr_audio[1]
 
     # Save downsampled audio in new NPZ
-    print(lr_samples)
     np.save(out_path, lr_samples)
 
 
-downsample_mehri_audio_set('data/music/music_train.npy', 'data/music/music_train_lr.npy', 8)
+downsample_mehri_audio_set('data/music/music_test.npy', 'data/music/music_test_lr.npy', 8)

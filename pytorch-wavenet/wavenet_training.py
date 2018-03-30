@@ -29,7 +29,7 @@ class WavenetTrainer:
                  snapshot_path=None,
                  snapshot_name='snapshot',
                  snapshot_interval=1000,
-                 dtype=torch.FloatTensor,
+                 dtype=torch.LongTensor,
                  ltype=torch.LongTensor):
         self.model = model
         self.dataset = dataset
@@ -61,12 +61,12 @@ class WavenetTrainer:
         for current_epoch in range(epochs):
             print("epoch", current_epoch)
             tic = time.time()
-            for (x, target) in iter(self.dataloader):
-                x = Variable(x.type(self.dtype))
-                target = Variable(target.view(-1).type(self.ltype))
+            for (lr, hr) in iter(self.dataloader):
+                lr = Variable(lr[:, :, None].type(self.dtype))
+                hr = Variable(hr[:, :, None].type(self.ltype))
 
-                output = self.model(x)
-                loss = F.cross_entropy(output.squeeze(), target.squeeze())
+                output = self.model(lr)
+                loss = F.cross_entropy(output.squeeze(), hr.squeeze())
                 self.optimizer.zero_grad()
                 loss.backward()
                 loss = loss.data[0]

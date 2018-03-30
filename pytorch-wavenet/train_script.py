@@ -1,11 +1,13 @@
 import time
 import torch
 
-from wavenet_model import WaveNetModel, load_latest_model_from
 from audio_data import WavenetDataset
-from wavenet_training import WavenetTrainer, generate_audio
+from data_loader import BDSRDataset
 from model_logging import TensorboardLogger
 from scipy.io import wavfile
+from wavenet_model import WaveNetModel, load_latest_model_from
+from wavenet_training import WavenetTrainer, generate_audio
+
 
 dtype = torch.FloatTensor
 ltype = torch.LongTensor
@@ -37,11 +39,15 @@ print('model: ', model)
 print('receptive field: ', model.receptive_field)
 print('parameter count: ', model.parameter_count())
 
-data = WavenetDataset(dataset_file='train_samples/bach_chaconne/dataset.npz',
-                      item_length=model.receptive_field + model.output_length - 1,
-                      target_length=model.output_length,
-                      file_location='train_samples/bach_chaconne',
-                      test_stride=500)
+# data = WavenetDataset(dataset_file='train_samples/bach_chaconne/dataset.npz',
+#                       item_length=model.receptive_field + model.output_length - 1,
+#                       target_length=model.output_length,
+#                       file_location='train_samples/bach_chaconne',
+#                       test_stride=500)
+data = BDSRDataset(lr_data_file='../data/music/music_valid_lr.npy',
+                   hr_data_file='../data/music/music_valid_hr.npy',
+                   item_length=model.receptive_field + model.output_length - 1,
+                   sample_rate=16000)
 print('the dataset has ' + str(len(data)) + ' items')
 
 
