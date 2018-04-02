@@ -13,7 +13,7 @@ def downsample_wav(file, bit_depth):
 
 
 # Downsamples NPZ file containing a set of WAVs
-def downsample_mehri_audio_set(data_path, out_path, bit_depth):
+def downsample_mehri_set(data_path, out_path, bit_depth):
     samples = np.load(data_path)
     lr_samples = np.empty_like(samples)
 
@@ -28,4 +28,4 @@ def downsample_mehri_audio_set(data_path, out_path, bit_depth):
     np.save(out_path, lr_samples)
 
 
-downsample_mehri_audio_set('data/music/music_test.npy', 'data/music/music_test_lr.npy', 8)
+downsample_mehri_set('data/music_ref/music_test.npy', 'data/music/music_test_lr.npy', 8)
