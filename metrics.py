@@ -28,9 +28,9 @@ def wav_snr(ref_file, in_file):
     return snr
 
 
-def bd_psnr(lr, hr):
+def bd_psnr_naive(lr, hr):
     """
-    Compute PNSR between 8-bit PCM LR and 16-bit PCM HR inputs
+    Compute PNSR between 8-bit PCM LR and 16-bit PCM HR inputs with naive upscaling
     """
     lr_scaled = (lr * 256)
     hr_scaled = (hr + 32768)
@@ -40,6 +40,15 @@ def bd_psnr(lr, hr):
     return psnr
 
 
-hr = np.load('data/music/music_test_hr.npy')[2]
-lr = np.load('data/music/music_test_lr.npy')[2]
-print(bd_psnr(lr, hr))
+def bd_psnr_raw(output, source):
+    """
+    Compute PNSR between 16-bit PCM upscaled output and 16-bit PCM source audio
+    """
+    mse = np.sum(np.square(source - output)) / output.shape[0]
+    psnr = 20 * np.log10(65535) - 10 * np.log10(mse)
+    return psnr
+
+
+# hr = np.load('data/music/music_test_hr.npy')[2]
+# lr = np.load('data/music/music_test_lr.npy')[2]
+# print(bd_psnr(lr, hr))
