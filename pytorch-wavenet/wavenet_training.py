@@ -62,10 +62,13 @@ class WavenetTrainer:
             print("epoch", current_epoch)
             tic = time.time()
             for (lr, hr) in iter(self.dataloader):
-                lr = Variable(lr[:, :, None].type(self.dtype))
-                hr = Variable(hr[:, :, None].type(self.ltype))
-
+                print(lr)
+                lr = Variable(lr.type(self.dtype))
+                hr = Variable(hr.type(self.ltype))
+                print(lr)
                 output = self.model(lr)
+                print(output)
+                print(hr)
                 loss = F.cross_entropy(output.squeeze(), hr.squeeze())
                 self.optimizer.zero_grad()
                 loss.backward()

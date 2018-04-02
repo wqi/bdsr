@@ -1,9 +1,9 @@
 import time
 import torch
 
+from model_logging import Logger
 from audio_data import WavenetDataset
 from data_loader import BDSRDataset
-from model_logging import TensorboardLogger
 from scipy.io import wavfile
 from wavenet_model import WaveNetModel, load_latest_model_from
 from wavenet_training import WavenetTrainer, generate_audio
@@ -23,6 +23,7 @@ model = WaveNetModel(layers=10,
                      dilation_channels=32,
                      residual_channels=32,
                      skip_channels=1024,
+                     in_channels=1,
                      end_channels=512,
                      output_length=16,
                      dtype=dtype,
@@ -68,12 +69,14 @@ def generate_and_log_samples(step):
     logger.audio_summary('temperature_1.0', tf_samples, step, sr=16000)
     print("audio clips generated")
 
-
-logger = TensorboardLogger(log_interval=200,
-                           validation_interval=400,
-                           generate_interval=800,
-                           generate_function=generate_and_log_samples,
-                           log_dir="logs/chaconne_model")
+logger = Logger(log_interval=20,
+                validation_interval=400,
+                generate_interval=1000)
+#logger = TensorboardLogger(log_interval=200,
+ #                          validation_interval=400,
+  #                         generate_interval=800,
+   #                        generate_function=generate_and_log_samples,
+    #                       log_dir="logs/chaconne_model")
 
 trainer = WavenetTrainer(model=model,
                          dataset=data,
