@@ -1,4 +1,3 @@
-import tensorflow as tf
 import numpy as np
 import scipy.misc
 import threading
@@ -57,7 +56,7 @@ class Logger:
             self.generate_thread.daemon = True
             self.generate_thread.start()
 
-
+"""
 # Code referenced from https://gist.github.com/gyglim/1f8dfb1b5c82627ae3efcfbbadb9f514
 class TensorboardLogger(Logger):
     def __init__(self,
@@ -93,12 +92,12 @@ class TensorboardLogger(Logger):
         self.audio_summary('audio sample', tf_samples, step, sr=16000)
 
     def scalar_summary(self, tag, value, step):
-        """Log a scalar variable."""
+       
         summary = tf.Summary(value=[tf.Summary.Value(tag=tag, simple_value=value)])
         self.writer.add_summary(summary, step)
 
     def image_summary(self, tag, images, step):
-        """Log a list of images."""
+       
 
         img_summaries = []
         for i, img in enumerate(images):
@@ -129,7 +128,7 @@ class TensorboardLogger(Logger):
 
 
     def histo_summary(self, tag, values, step, bins=200):
-        """Log a histogram of the tensor of values."""
+        Log a histogram of the tensor of values.
 
         # Create a histogram using numpy
         counts, bin_edges = np.histogram(values, bins=bins)
@@ -162,3 +161,4 @@ class TensorboardLogger(Logger):
         #summary = tf.summary.tensor_summary(name=tag, tensor=tensor)
         self.writer.add_summary(summary, step)
 
+"""

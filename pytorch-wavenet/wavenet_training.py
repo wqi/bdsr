@@ -62,14 +62,13 @@ class WavenetTrainer:
             print("epoch", current_epoch)
             tic = time.time()
             for (lr, hr) in iter(self.dataloader):
-                print(lr)
                 lr = Variable(lr.type(self.dtype))
                 hr = Variable(hr.type(self.ltype))
-                print(lr)
+                hr = hr.transpose(1,2)
+                hr = hr[:,-self.model.output_length:,:]
                 output = self.model(lr)
-                print(output)
-                print(hr)
-                loss = F.cross_entropy(output.squeeze(), hr.squeeze())
+                #print("OUTPUT "+str(output))
+                loss = F.mse_loss(output.squeeze(), hr.squeeze().float())
                 self.optimizer.zero_grad()
                 loss.backward()
                 loss = loss.data[0]
@@ -102,7 +101,7 @@ class WavenetTrainer:
             target = Variable(target.view(-1).type(self.ltype))
 
             output = self.model(x)
-            loss = F.cross_entropy(output.squeeze(), target.squeeze())
+            loss = F.mse_loss(output.squeeze(), target.squeeze())
             total_loss += loss.data[0]
 
             predictions = torch.max(output, 1)[1].view(-1)

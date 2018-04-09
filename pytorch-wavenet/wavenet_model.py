@@ -125,7 +125,6 @@ class WaveNetModel(nn.Module):
         self.receptive_field = receptive_field
 
     def wavenet(self, input, dilation_func):
-
         x = self.start_conv(input)
         skip = 0
 
@@ -165,7 +164,6 @@ class WaveNetModel(nn.Module):
 
             x = self.residual_convs[i](x)
             x = x + residual[:, :, (self.kernel_size - 1):]
-
         x = F.relu(skip)
         x = F.relu(self.end_conv_1(x))
         x = self.end_conv_2(x)
@@ -188,13 +186,16 @@ class WaveNetModel(nn.Module):
     def forward(self, input):
         x = self.wavenet(input,
                          dilation_func=self.wavenet_dilate)
-
         # reshape output
         [n, c, l] = x.size()
+        #print(str(n)+" "+str(c)+" "+str(l))
         l = self.output_length
+        #print(l)
         x = x[:, :, -l:]
+        #print(x)
         x = x.transpose(1, 2).contiguous()
-        x = x.view(n * l, c)
+        #print(x)
+        #x = x.view(n * l, c)
         return x
 
     def generate(self,

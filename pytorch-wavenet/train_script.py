@@ -24,8 +24,9 @@ model = WaveNetModel(layers=10,
                      residual_channels=32,
                      skip_channels=1024,
                      in_channels=1,
+                     classes=1,
                      end_channels=512,
-                     output_length=16,
+                     output_length=1,
                      dtype=dtype,
                      bias=True)
 
@@ -80,7 +81,7 @@ logger = Logger(log_interval=20,
 
 trainer = WavenetTrainer(model=model,
                          dataset=data,
-                         lr=0.0001,
+                         lr=0.001,
                          weight_decay=0.0,
                          snapshot_path='snapshots',
                          snapshot_name='chaconne_model',
@@ -91,5 +92,5 @@ trainer = WavenetTrainer(model=model,
 
 print('start training...')
 trainer.train(batch_size=16,
-              epochs=10,
+              epochs=20,
               continue_training_at_step=0)
