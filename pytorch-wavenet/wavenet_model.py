@@ -74,6 +74,7 @@ class WaveNetModel(nn.Module):
             new_dilation = 1
             for i in range(layers):
                 # dilations of this layer
+                # dilations of this layer
                 self.dilations.append((new_dilation, init_dilation))
 
                 # dilated queues for fast generation
@@ -131,7 +132,6 @@ class WaveNetModel(nn.Module):
 
         # WaveNet layers
         for i in range(self.blocks * self.layers):
-
             #			 |----------------------------------------|     *residual*
             #            |                                        |
             # 	       	 |	  |-- conv -- tanh --|			      |
@@ -191,10 +191,7 @@ class WaveNetModel(nn.Module):
 
         # reshape output
         [n, c, l] = x.size()
-        l = self.output_length
-        x = x[:, :, -l:]
-        x = x.transpose(1, 2).contiguous()
-        x = x.view(n * l, c)
+        x = x.contiguous()
         return x
 
     def generate(self,

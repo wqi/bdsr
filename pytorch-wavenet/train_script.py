@@ -26,6 +26,7 @@ model = WaveNetModel(layers=10,
                      in_channels=1,
                      end_channels=512,
                      output_length=16,
+                     classes=65536,
                      dtype=dtype,
                      bias=True)
 
@@ -47,7 +48,7 @@ print('parameter count: ', model.parameter_count())
 #                       test_stride=500)
 data = BDSRDataset(lr_data_file='../data/music/music_valid_lr.npy',
                    hr_data_file='../data/music/music_valid_hr.npy',
-                   item_length=model.receptive_field + model.output_length - 1,
+                   item_length=model.receptive_field+10,
                    sample_rate=16000)
 print('the dataset has ' + str(len(data)) + ' items')
 
