@@ -1,9 +1,12 @@
+import numpy as np
+import scipy.io.wavfile as wav
 import time
-from wavenet_model import *
-from audio_data import WavenetDataset
-from wavenet_training import *
-from model_logging import *
-from scipy.io import wavfile
+import torch
+import torch.nn.functional as F
+import wavenet_model as wm
+
+from data_loader import BDSRDataset
+from torch.autograd import Variable
 
 dtype = torch.FloatTensor
 ltype = torch.LongTensor
@@ -14,65 +17,67 @@ if use_cuda:
     dtype = torch.cuda.FloatTensor
     ltype = torch.cuda.LongTensor
 
-model = WaveNetModel(layers=8,
-                     blocks=4,
-                     dilation_channels=16,
-                     residual_channels=16,
-                     skip_channels=16,
-                     output_length=8,
-                     dtype=dtype)
+model = wm.WaveNetModel(layers=10,
+                        blocks=3,
+                        dilation_channels=32,
+                        residual_channels=32,
+                        skip_channels=1024,
+                        in_channels=1,
+                        end_channels=512,
+                        output_length=16,
+                        classes=65536,
+                        dtype=dtype,
+                        bias=True)
 
-#model = load_latest_model_from('snapshots')
-#model = torch.load('snapshots/snapshot_2017-12-10_09-48-19')
+model = wm.load_latest_model_from('snapshots')
 
-data = WavenetDataset(dataset_file='train_samples/saber/dataset.npz',
-                      item_length=model.receptive_field + model.output_length - 1,
-                      target_length=model.output_length,
-                      file_location='train_samples/saber',
-                      test_stride=20)
+data = BDSRDataset(lr_data_file='../data/music/music_test_lr.npy',
+                   hr_data_file='../data/music/music_test_hr.npy',
+                   item_length=18000,
+                   sample_rate=16000)
+dataloader = torch.utils.data.DataLoader(data,
+                                         batch_size=1,
+                                         shuffle=False,
+                                         num_workers=8,
+                                         pin_memory=False)
 
-# torch.save(model, 'untrained_model')
-print('the dataset has ' + str(len(data)) + ' items')
-print('model: ', model)
-print('receptive field: ', model.receptive_field)
-print('parameter count: ', model.parameter_count())
-
-
-def generate_and_log_samples(step):
-    sample_length=4000
-    gen_model = load_latest_model_from('snapshots')
-    print("start generating...")
-    samples = generate_audio(gen_model,
-                             length=sample_length,
-                             temperatures=[0])
-    tf_samples = tf.convert_to_tensor(samples, dtype=tf.float32)
-    logger.audio_summary('temperature 0', tf_samples, step, sr=16000)
-
-    samples = generate_audio(gen_model,
-                             length=sample_length,
-                             temperatures=[0.5])
-    tf_samples = tf.convert_to_tensor(samples, dtype=tf.float32)
-    logger.audio_summary('temperature 0.5', tf_samples, step, sr=16000)
-    print("audio clips generated")
-
-logger = TensorboardLogger(log_interval=200,
-                           validation_interval=200,
-                           generate_interval=500,
-                           generate_function=generate_and_log_samples,
-                           log_dir="logs")
-
-trainer = WavenetTrainer(model=model,
-                           dataset=data,
-                           lr=0.0001,
-                           weight_decay=0.1,
-                           logger=logger,
-                           snapshot_path='snapshots',
-                           snapshot_name='saber_model',
-                           snapshot_interval=500)
-
-print('start training...')
+print("")
 tic = time.time()
-trainer.train(batch_size=8,
-              epochs=20)
+for (lr, hr) in iter(dataloader):
+    lr = Variable(lr.type(dtype))
+
+    output = model(lr).squeeze(dim=1)
+    output_length = output.size(1)
+    output = output.view(output.size(0)*output.size(1), output.size(2))
+
+    output = F.softmax(output, dim=1)
+    _, output_values = output.data.topk(1)
+    output_values = np.squeeze(output_values.cpu().numpy())
+
+    hr = Variable(hr.type(ltype)) + (65536//2-1)
+    hr = hr.squeeze(dim=1)[:, -output_length:].contiguous()
+    hr = hr.view(hr.size(0)*hr.size(1))
+    hr = np.squeeze(hr.cpu().data.numpy())
+
+    lr = lr.squeeze(dim=1)[:, -output_length:].contiguous()
+    lr = np.squeeze(lr.cpu().data.numpy()) * 256
+
+    # Compute differences
+    output_diff = output_values - hr
+    lr_diff = lr - hr
+    print("Mean BDSR Diff:", np.mean(np.abs(output_diff)))
+    print("Mean Naive Diff:", np.mean(np.abs(lr_diff)))
+
+    # Write WAV
+    lr = lr - 32768
+    hr = hr - 32768
+    output_values = output_values - 32768
+    print(hr)
+    print(output_values)
+    wav.write('out.wav', 16000, output_values.astype('int16'))
+    wav.write('out_lr.wav', 16000, lr.astype('int16'))
+    wav.write('out_hr.wav', 16000, hr.astype('int16'))
+
+    break
 toc = time.time()
-print('Training took {} seconds.'.format(toc - tic))
+print("Generation took", str((toc - tic) * 0.01), "seconds")
