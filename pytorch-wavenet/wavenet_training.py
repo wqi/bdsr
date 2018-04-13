@@ -28,7 +28,7 @@ class WavenetTrainer:
                  logger=Logger(),
                  snapshot_path=None,
                  snapshot_name='snapshot',
-                 snapshot_interval=1000,
+                 snapshot_interval=100,
                  dtype=torch.LongTensor,
                  ltype=torch.LongTensor):
         self.model = model
@@ -63,10 +63,12 @@ class WavenetTrainer:
             tic = time.time()
             for (lr, hr) in iter(self.dataloader):
                 lr = Variable(lr.type(self.dtype))
-                hr = Variable(hr.type(self.ltype)) + 65536/2-1
-                output = self.model(lr)
-                print(hr)
-                loss = F.cross_entropy(output.squeeze(), hr[:,:,-output.size(2):].squeeze())
+                hr = Variable(hr.type(self.ltype)) + (65536//2-1)
+                output = self.model(lr).squeeze(dim=1)
+                hr = hr.squeeze(dim=1)[:,-output.size(1):].contiguous()
+                hr = hr.view(hr.size(0)*hr.size(1))
+                output = output.view(output.size(0)*output.size(1), output.size(2))
+                loss = F.cross_entropy(output, hr)
                 self.optimizer.zero_grad()
                 loss.backward()
                 loss = loss.data[0]
@@ -85,7 +87,7 @@ class WavenetTrainer:
                     if self.snapshot_path is None:
                         continue
                     time_string = time.strftime("%Y-%m-%d_%H-%M-%S", time.gmtime())
-                    torch.save(self.model, self.snapshot_path + '/' + self.snapshot_name + '_' + time_string)
+                    torch.save(self.model, self.snapshot_path + '/' + self.snapshot_name)
 
                 self.logger.log(step, loss)
 

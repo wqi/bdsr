@@ -85,12 +85,12 @@ trainer = WavenetTrainer(model=model,
                          weight_decay=0.0,
                          snapshot_path='snapshots',
                          snapshot_name='chaconne_model',
-                         snapshot_interval=1000,
+                         snapshot_interval=100,
                          logger=logger,
                          dtype=dtype,
                          ltype=ltype)
 
 print('start training...')
-trainer.train(batch_size=16,
-              epochs=10,
+trainer.train(batch_size=5,
+              epochs=200,
               continue_training_at_step=0)
