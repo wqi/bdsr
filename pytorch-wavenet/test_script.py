@@ -33,7 +33,7 @@ model = wm.load_latest_model_from('snapshots')
 
 data = BDSRDataset(lr_data_file='../data/music/music_test_lr.npy',
                    hr_data_file='../data/music/music_test_hr.npy',
-                   item_length=18000,
+                   item_length=127000,
                    sample_rate=16000)
 dataloader = torch.utils.data.DataLoader(data,
                                          batch_size=1,
@@ -43,6 +43,10 @@ dataloader = torch.utils.data.DataLoader(data,
 
 print("")
 tic = time.time()
+total_bdsr_error = 0
+total_naive_error = 0
+sample_num = 0
+
 for (lr, hr) in iter(dataloader):
     lr = Variable(lr.type(dtype))
 
@@ -63,10 +67,12 @@ for (lr, hr) in iter(dataloader):
     lr = np.squeeze(lr.cpu().data.numpy()) * 256
 
     # Compute differences
+    output_values = lr + output_values - 256
     output_diff = output_values - hr
     lr_diff = lr - hr
-    print("Mean BDSR Diff:", np.mean(np.abs(output_diff)))
-    print("Mean Naive Diff:", np.mean(np.abs(lr_diff)))
+
+    total_bdsr_error += np.mean(np.abs(output_diff))
+    total_naive_error += np.mean(np.abs(lr_diff))
 
     # Write WAV
     lr = lr - 32768
@@ -78,6 +84,12 @@ for (lr, hr) in iter(dataloader):
     wav.write('out_lr.wav', 16000, lr.astype('int16'))
     wav.write('out_hr.wav', 16000, hr.astype('int16'))
 
-    break
+    sample_num += 1
+    if sample_num >= 5:
+        break
+
 toc = time.time()
-print("Generation took", str((toc - tic) * 0.01), "seconds")
+
+print(len(data))
+print("Mean BDSR Diff:", total_bdsr_error / 5)
+print("Mean Naive Diff:", total_naive_error / 5)
