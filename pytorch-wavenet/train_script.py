@@ -46,10 +46,11 @@ print('parameter count: ', model.parameter_count())
 #                       target_length=model.output_length,
 #                       file_location='train_samples/bach_chaconne',
 #                       test_stride=500)
-data = BDSRDataset(lr_data_file='../data/music/music_train_lr.npy',
-                   hr_data_file='../data/music/music_train_hr.npy',
-                   item_length=model.receptive_field+10,
-                   sample_rate=16000)
+data = BDSRDataset(lr_data_file='../data/vctk/vctk_train_lr.npy',
+                   hr_data_file='../data/vctk/vctk_train_hr.npy',
+                   item_length=3080,  # model.receptive_field + 10
+                   sample_rate=16000,
+                   memmap=False)
 print('the dataset has ' + str(len(data)) + ' items')
 
 
@@ -84,13 +85,13 @@ trainer = WavenetTrainer(model=model,
                          lr=0.0001,
                          weight_decay=0.0,
                          snapshot_path='snapshots',
-                         snapshot_name='diff_model',
+                         snapshot_name='vctk_1000',
                          snapshot_interval=100,
                          logger=logger,
                          dtype=dtype,
                          ltype=ltype)
 
 print('start training...')
-trainer.train(batch_size=20,
-              epochs=20,
+trainer.train(batch_size=50,
+              epochs=1000,
               continue_training_at_step=0)

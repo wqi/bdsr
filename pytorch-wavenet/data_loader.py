@@ -4,14 +4,18 @@ import torch.utils.data
 
 
 class BDSRDataset(torch.utils.data.Dataset):
-    def __init__(self, lr_data_file, hr_data_file, item_length, sample_rate=16000):
+    def __init__(self, lr_data_file, hr_data_file, item_length, sample_rate=16000, memmap=True):
         self.lr_data_file = lr_data_file
         self.hr_data_file = hr_data_file
         self.item_length = item_length
         self.sample_rate = sample_rate
 
-        self.lr_data = np.load(self.lr_data_file, mmap_mode='r')
-        self.hr_data = np.load(self.hr_data_file, mmap_mode='r')
+        if memmap:
+            self.lr_data = np.load(self.lr_data_file, mmap_mode='r')
+            self.hr_data = np.load(self.hr_data_file, mmap_mode='r')
+        else:
+            self.lr_data = np.load(self.lr_data_file)
+            self.hr_data = np.load(self.hr_data_file)
         assert self.lr_data.shape == self.hr_data.shape, "LR-HR dataset shapes don't match"
 
     def __len__(self):

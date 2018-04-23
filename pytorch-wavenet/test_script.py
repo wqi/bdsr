@@ -31,13 +31,14 @@ model = wm.WaveNetModel(layers=10,
 
 model = wm.load_latest_model_from('snapshots')
 
-data = BDSRDataset(lr_data_file='../data/music/music_test_lr.npy',
-                   hr_data_file='../data/music/music_test_hr.npy',
-                   item_length=127000,
-                   sample_rate=16000)
+data = BDSRDataset(lr_data_file='../data/vctk/vctk_train_lr.npy',
+                   hr_data_file='../data/vctk/vctk_train_hr.npy',
+                   item_length=24640,
+                   sample_rate=16000,
+                   memmap=False)
 dataloader = torch.utils.data.DataLoader(data,
                                          batch_size=1,
-                                         shuffle=False,
+                                         shuffle=True,
                                          num_workers=8,
                                          pin_memory=False)
 
@@ -49,7 +50,7 @@ sample_num = 0
 
 for (lr, hr) in iter(dataloader):
     lr = Variable(lr.type(dtype))
-
+    print(lr)
     output = model(lr).squeeze(dim=1)
     output_length = output.size(1)
     output = output.view(output.size(0)*output.size(1), output.size(2))
@@ -85,11 +86,11 @@ for (lr, hr) in iter(dataloader):
     wav.write('out_hr.wav', 16000, hr.astype('int16'))
 
     sample_num += 1
-    if sample_num >= 5:
+    if sample_num >= 1:
         break
 
 toc = time.time()
 
 print(len(data))
-print("Mean BDSR Diff:", total_bdsr_error / 5)
-print("Mean Naive Diff:", total_naive_error / 5)
+print("Mean BDSR Diff:", total_bdsr_error / 1)
+print("Mean Naive Diff:", total_naive_error / 1)

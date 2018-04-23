@@ -49,6 +49,6 @@ def bd_psnr_raw(output, source):
     return psnr
 
 
-# hr = np.load('data/music/music_test_hr.npy')[2]
-# lr = np.load('data/music/music_test_lr.npy')[2]
-# print(bd_psnr(lr, hr))
+hr = './pytorch-wavenet/out_hr.wav'
+lr = './pytorch-wavenet/out_lr.wav'
+print(wav_snr(lr, hr))
