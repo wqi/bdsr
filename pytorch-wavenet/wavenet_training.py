@@ -17,6 +17,27 @@ def print_last_validation_result(opt):
     print("validation loss: ", opt.validation_results[-1])
 
 
+def mixture_loss(input, target, bin_count=256):
+    l = input.size(0)
+    loss = discretized_mix_logistic_loss(input, target, bin_count=bin_count, reduce=True)
+    return loss / l
+
+
+def mixture_accuracy(input, target, bin_count=256):
+    modes = get_modes_from_discretized_mix_logistic(input, bin_count=bin_count)
+    half_bin_size = 1./float(bin_count)
+    accurate_predictions = torch.abs(target - modes) < half_bin_size
+    accurate_prediction_count = torch.sum(accurate_predictions.int())
+    return accurate_prediction_count.data[0]
+
+
+def softmax_accuracy(input, target):
+    predictions = torch.max(input, 1)[1].view(-1)
+    correct_pred = torch.eq(target, predictions)
+    correct_predictions = torch.sum(correct_pred).data[0]
+    return correct_predictions
+
+
 class WavenetTrainer:
     def __init__(self,
                  model,
