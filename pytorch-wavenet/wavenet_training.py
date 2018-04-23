@@ -17,7 +17,7 @@ def print_last_validation_result(opt):
     print("validation loss: ", opt.validation_results[-1])
 
 
-def mixture_loss(input, target, bin_count=256):
+def mixture_loss(input, target, bin_count=512):
     l = input.size(0)
     loss = discretized_mix_logistic_loss(input, target, bin_count=bin_count, reduce=True)
     return loss / l
@@ -91,11 +91,11 @@ class WavenetTrainer:
                 output = self.model(input).squeeze(dim=1)
 
                 target = target.squeeze(dim=1)[:, -output.size(1):].contiguous()
-                target = target.view(target.size(0)*target.size(1))
+                target = target.view(target.size(0)*target.size(1)).float()
                 output = output.view(output.size(0)*output.size(1), output.size(2))
                 # print(target)
                 # print(output)
-                loss = F.cross_entropy(output, target)
+                loss = mixture_loss(output, target)
                 self.optimizer.zero_grad()
                 loss.backward()
                 loss = loss.data[0]
@@ -128,7 +128,7 @@ class WavenetTrainer:
             target = Variable(target.view(-1).type(self.ltype))
 
             output = self.model(x)
-            loss = F.cross_entropy(output.squeeze(), target.squeeze())
+            loss = mixture_loss(output.squeeze(), target.squeeze())
             total_loss += loss.data[0]
 
             predictions = torch.max(output, 1)[1].view(-1)

@@ -205,6 +205,7 @@ def discretized_mix_logistic_loss(input, target, bin_count=0, reduce=True):
     nr_mix = input.size()[-1] // 3  # number of mixtures, // 3 because we have weights, means and scales
     target = target.unsqueeze(1)
 
+
     # parameters of the mixtures
     weights = input[:, :nr_mix]
     means = input[:, nr_mix:2*nr_mix]

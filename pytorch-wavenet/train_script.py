@@ -26,7 +26,7 @@ model = WaveNetModel(layers=10,
                      in_channels=1,
                      end_channels=512,
                      output_length=16,
-                     classes=512,
+                     classes=30,
                      dtype=dtype,
                      bias=True)
 
