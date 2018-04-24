@@ -47,8 +47,3 @@ def bd_psnr_raw(output, source):
     mse = np.sum(np.square(source - output)) / output.shape[0]
     psnr = 20 * np.log10(65535) - 10 * np.log10(mse)
     return psnr
-
-
-hr = './pytorch-wavenet/out_hr.wav'
-lr = './pytorch-wavenet/out_lr.wav'
-print(wav_snr(lr, hr))

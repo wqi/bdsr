@@ -1,3 +1,4 @@
+import metrics
 import numpy as np
 import scipy.io.wavfile as wav
 import time
@@ -31,9 +32,9 @@ model = wm.WaveNetModel(layers=10,
 
 model = wm.load_latest_model_from('snapshots')
 
-data = BDSRDataset(lr_data_file='../data/vctk/vctk_train_lr.npy',
-                   hr_data_file='../data/vctk/vctk_train_hr.npy',
-                   item_length=24640,
+data = BDSRDataset(lr_data_file='../data/vctk/vctk_test_lr.npy',
+                   hr_data_file='../data/vctk/vctk_test_hr.npy',
+                   item_length=33000,
                    sample_rate=16000,
                    memmap=False)
 dataloader = torch.utils.data.DataLoader(data,
@@ -44,8 +45,8 @@ dataloader = torch.utils.data.DataLoader(data,
 
 print("")
 tic = time.time()
-total_bdsr_error = 0
-total_naive_error = 0
+total_bdsr_psnr = 0
+total_naive_psnr = 0
 sample_num = 0
 
 for (lr, hr) in iter(dataloader):
@@ -67,13 +68,16 @@ for (lr, hr) in iter(dataloader):
     lr = lr.squeeze(dim=1)[:, -output_length:].contiguous()
     lr = np.squeeze(lr.cpu().data.numpy()) * 256
 
-    # Compute differences
+    # Compute PSNR
     output_values = lr + output_values - 256
     output_diff = output_values - hr
     lr_diff = lr - hr
 
-    total_bdsr_error += np.mean(np.abs(output_diff))
-    total_naive_error += np.mean(np.abs(lr_diff))
+    bdsr_psnr = metrics.bd_psnr_raw(output_values, hr)
+    naive_psnr = metrics.bd_psnr_raw(lr, hr)
+
+    total_bdsr_psnr += bdsr_psnr
+    total_naive_psnr += naive_psnr
 
     # Write WAV
     lr = lr - 32768
@@ -86,11 +90,9 @@ for (lr, hr) in iter(dataloader):
     wav.write('out_hr.wav', 16000, hr.astype('int16'))
 
     sample_num += 1
-    if sample_num >= 1:
-        break
 
 toc = time.time()
 
 print(len(data))
-print("Mean BDSR Diff:", total_bdsr_error / 1)
-print("Mean Naive Diff:", total_naive_error / 1)
+print("Mean BDSR PSNR:", total_bdsr_psnr / sample_num)
+print("Mean Naive PSNR:", total_naive_psnr / sample_num)
