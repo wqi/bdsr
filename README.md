@@ -9,7 +9,7 @@ We evaluate several modifications to WaveNet, including:
 - Delta prediction - assuming 8-bit audio mostly preserves the 16-bit audio data, we aim to only predict the delta between the two waveforms
 - Real-valued prediction - since the amplitude space is inherently continuous (discretized during compression), a real-valued number space is a more natural model than a categorical output passed through softmax.
 
-Improvements are subtle, though we terminated training early due to resource constraints and observed that loss was still decreasing approximately linearly at time of evaluation. We believe there is further improvements to be had with our architecture given sufficient training.
+Improvements are subtle but include audible muffling of the background noise, though we terminated training early due to resource constraints and observed that loss was still decreasing approximately linearly at time of evaluation. We believe there is further improvements to be had with our architecture given sufficient training.
 
 ## Final Write up
 
