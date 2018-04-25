@@ -4,9 +4,9 @@ Add the link to the file here
 
 ### Presentation
 
-https://docs.google.com/presentation/d/1v5Owld86O0bTP-DzA1GduOWUc7VjaDX2coKRNJ4sWQQ/edit?usp=sharing
+[Project Presentation](https://goo.gl/74kvXg)
 
 ### Source code
 
-https://github.com/wqi/bdsr
+[Source Code](https://github.com/wqi/bdsr)
 
