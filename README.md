@@ -1,6 +1,6 @@
 ## Final Write up
 
-Add the link to the file here
+[Audio Bit Depth Paper](https://github.com/wqi/bdsr/blob/master/audio-bit-depth.pdf)
 
 ### Presentation
 
