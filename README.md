@@ -10,3 +10,4 @@ Add the link to the file here
 
 [Source Code](https://github.com/wqi/bdsr)
 
+Maintained by Taylor Lundy, Thomas Liu, and William Qi
