@@ -11,8 +11,6 @@ We evaluate several modifications to WaveNet, including:
 
 Improvements are subtle, though we terminated training early due to resource constraints and observed that loss was still decreasing approximately linearly at time of evaluation. We believe there is further improvements to be had with our architecture given sufficient training.
 
-[https://drive.google.com/drive/u/0/folders/132KivXYZcXYS2qy4dlK9ksxxLsbA3lQB](Audio Samples)
-
 ## Final Write up
 
 [Audio Bit Depth Super Resolution Paper](https://github.com/wqi/bdsr/blob/master/docs/paper.pdf)
