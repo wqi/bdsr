@@ -78,24 +78,27 @@ class WavenetTrainer:
                                                       shuffle=True,
                                                       num_workers=8,
                                                       pin_memory=False)
+        shift = self.model.receptive_field // 2
         step = continue_training_at_step
         for current_epoch in range(epochs):
             print("epoch", current_epoch)
             tic = time.time()
             for (lr, hr) in iter(self.dataloader):
-                target = hr + (65536//2 - 1)
-                target = target - (lr * 256) + 256
+                target = hr + 65536//2
+                target = target - (lr * 256)
 
                 input = Variable(lr.type(self.dtype))
                 target = Variable(target.type(self.ltype))
                 output = self.model(input).squeeze(dim=1)
+                output = output.squeeze(dim=1)
+                output = output[:, shift:-shift].contiguous()
 
-                target = target.squeeze(dim=1)[:, -output.size(1):].contiguous()
-                target = target.view(target.size(0)*target.size(1))
+                target = target.squeeze(dim=1)[:, -(output.size(1)+shift):-shift].contiguous()
+                target = target.view(target.size(0)*target.size(1)).float()
                 output = output.view(output.size(0)*output.size(1), output.size(2))
                 # print(target)
                 # print(output)
-                loss = F.cross_entropy(output, target)
+                loss = F.mse_loss(output, target)
                 self.optimizer.zero_grad()
                 loss.backward()
                 loss = loss.data[0]

@@ -1,4 +1,4 @@
-#import tensorflow as tf
+# import tensorflow as tf
 import numpy as np
 import scipy.misc
 import threading
@@ -34,9 +34,9 @@ class Logger:
         '''
         if current_step % self.validation_interval == 0:
             self.validate(current_step)
+        '''
         if current_step % self.generate_interval == 0:
             self.generate(current_step)
-        '''
 
     def log_loss(self, current_step):
         avg_loss = self.accumulated_loss / self.log_interval
@@ -65,7 +65,7 @@ class TensorboardLogger(Logger):
     def __init__(self,
                  log_interval=50,
                  validation_interval=200,
-                 generate_interval=500,
+                 generate_interval=50,
                  trainer=None,
                  generate_function=None,
                  log_dir='logs'):

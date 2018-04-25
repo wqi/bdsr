@@ -34,8 +34,8 @@ class WaveNetModel(nn.Module):
                  end_channels=256,
                  in_channels=256,
                  classes=256,
-                 output_length=32,
-                 kernel_size=2,
+                 output_length=3070,
+                 kernel_size=3,
                  dtype=torch.FloatTensor,
                  bias=False):
 
@@ -66,7 +66,7 @@ class WaveNetModel(nn.Module):
         # 1x1 convolution to create channels
         self.start_conv = nn.Conv1d(in_channels=self.in_channels,
                                     out_channels=residual_channels,
-                                    kernel_size=1,
+                                    kernel_size=3,
                                     bias=bias)
 
         for b in range(blocks):
@@ -113,12 +113,12 @@ class WaveNetModel(nn.Module):
 
         self.end_conv_1 = nn.Conv1d(in_channels=skip_channels,
                                   out_channels=end_channels,
-                                  kernel_size=1,
+                                  kernel_size=3,
                                   bias=True)
 
         self.end_conv_2 = nn.Conv1d(in_channels=end_channels,
                                     out_channels=classes,
-                                    kernel_size=1,
+                                    kernel_size=3,
                                     bias=True)
 
         # self.output_length = 2 ** (layers - 1)

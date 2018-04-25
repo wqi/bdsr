@@ -18,19 +18,19 @@ if use_cuda:
     dtype = torch.cuda.FloatTensor
     ltype = torch.cuda.LongTensor
 
-model = WaveNetModel(layers=10,
+model = WaveNetModel(layers=11,
                      blocks=3,
                      dilation_channels=32,
                      residual_channels=32,
                      skip_channels=1024,
                      in_channels=1,
                      end_channels=512,
-                     output_length=16,
-                     classes=512,
+                     output_length=3070,
+                     classes=1,
                      dtype=dtype,
                      bias=True)
 
-# model = load_latest_model_from('snapshots', use_cuda=True)
+model = load_latest_model_from('snapshots', use_cuda=True)
 # model = torch.load('snapshots/some_model')
 
 if use_cuda:
@@ -48,7 +48,7 @@ print('parameter count: ', model.parameter_count())
 #                       test_stride=500)
 data = BDSRDataset(lr_data_file='../data/music/music_train_lr.npy',
                    hr_data_file='../data/music/music_train_hr.npy',
-                   item_length=model.receptive_field+10,
+                   item_length=model.receptive_field*2,
                    sample_rate=16000)
 print('the dataset has ' + str(len(data)) + ' items')
 
@@ -73,15 +73,15 @@ def generate_and_log_samples(step):
 logger = Logger(log_interval=20,
                 validation_interval=400,
                 generate_interval=1000)
-#logger = TensorboardLogger(log_interval=200,
- #                          validation_interval=400,
-  #                         generate_interval=800,
-   #                        generate_function=generate_and_log_samples,
-    #                       log_dir="logs/chaconne_model")
+'''
+logger = TensorboardLogger(log_interval=40,
+                           validation_interval=400,
+                           log_dir="logs/chaconne_model")
+'''
 
 trainer = WavenetTrainer(model=model,
                          dataset=data,
-                         lr=0.0001,
+                         lr=0.00001,
                          weight_decay=0.0,
                          snapshot_path='snapshots',
                          snapshot_name='diff_model',
@@ -91,6 +91,6 @@ trainer = WavenetTrainer(model=model,
                          ltype=ltype)
 
 print('start training...')
-trainer.train(batch_size=20,
-              epochs=20,
+trainer.train(batch_size=5,
+              epochs=200,
               continue_training_at_step=0)

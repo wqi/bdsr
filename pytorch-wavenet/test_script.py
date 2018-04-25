@@ -59,12 +59,14 @@ for (lr, hr) in iter(dataloader):
     lr = Variable(lr.type(dtype))
 
     output = model(lr).squeeze(dim=1)
-    output = output[:, shift:-shift, :].contiguous()
+    output = output[:, shift:-shift].contiguous()
     output_length = output.size(1)
 
+    '''
     output = F.softmax(output, dim=1)
     _, output_values = output.data.topk(1)
-    output_values = np.squeeze(output_values.cpu().numpy())
+    '''
+    output_values = np.squeeze(output.data.cpu().numpy())
 
     hr = Variable(hr.type(ltype)) + 65536//2
     hr = hr.squeeze(dim=1)[:, -(output_length+shift):-shift].contiguous()
@@ -74,7 +76,7 @@ for (lr, hr) in iter(dataloader):
     lr = np.squeeze(lr.cpu().data.numpy()) * 256
 
     # Compute differences
-    output_values = lr + output_values - 256
+    output_values = lr + output_values
     output_diff = output_values - hr
     lr_diff = lr - hr
     print(lr_diff)
